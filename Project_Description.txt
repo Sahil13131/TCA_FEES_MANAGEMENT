@@ -1,0 +1,167 @@
+
+										TCA-FEE-MANAGEMENT
+======================================================================================================
+Project using HTML, CSS, BOOTSTRAP, JAVA, SERVLET, JSP, JDBC, POSTGRESQL
+======================================================================================================
+
+
+STEP - 1 : CREATE DATABASE FOR PROJECT
+--------------------------------------------------------------------------
+
+CREATE DATABASE tca_project;
+
+Connect to database
+--------------------
+\c tca_project
+
+
+
+STEP - 2 : CREATE ROLE FOR JDBC CONNECTION i.e user, password 
+--------------------------------------------------------------------------
+
+create role sahil login superuser password '1312003';
+
+
+STEP - 3 : CREATE SEQUENCE FOR AUTO GENERATION PRIMARY KEY
+--------------------------------------------------------------------------
+
+create SEQUENCE tca_student_seq start 101;
+
+
+STEP - 4 : CREATE LOGIN PAGE USERNAME AND PASSWORD VALIDATION TABLE
+--------------------------------------------------------------------------
+
+create table com_tca_admin(
+
+						admin_id int primary key,
+						admin_username varchar(9) check(length(admin_username)=9),
+						password varchar(8) check(length(password) > 3)
+);
+
+insert into com_tca_admin values(2009,'Admin@TCA','TCA@2009');
+
+
+STEP - 5 : CREATE FIRST TABLE student_fee_details AND INSERT RECORDS
+--------------------------------------------------------------------------
+
+CREATE TABLE student_fee_details (
+
+student_no int PRIMARY KEY DEFAULT nextval('tca_student_seq'), 
+student_full_name varchar(50) NOT NULL, 
+student_email varchar(50) UNIQUE NOT NULL, 
+student_phone_num bigint UNIQUE NOT NULL CHECK(student_phone_num>=1000000000 AND student_phone_num<=9999999999), 
+student_whatsapp_num bigint UNIQUE NOT NULL CHECK(student_whatsapp_num>=1000000000 AND student_whatsapp_num<=9999999999)
+
+                                 );
+
+
+insert into student_fee_details (student_full_name,student_email,student_phone_num,student_whatsapp_num) values ('Vai R Jadhav', 'vai28@gmail.com', 9999999920, 9999999920);
+
+
+
+STEP - 6 : CREATE SECOND TABLE course_details AND INSERT RECORDS
+------------------------------------------------------------------------------
+
+CREATE TABLE course_details (
+
+                             course_code int PRIMARY KEY, 
+                             course_name varchar(20) NOT NULL, 
+                             course_fee float NOT NULL
+                        
+                        	);
+
+
+insert into course_details values (1001, 'HTML | CSS', 5000.00);
+insert into course_details values (1002, 'JavaScript,BootStrap', 8000.00);
+	insert into course_details values (1003, 'C', 5000.00);
+insert into course_details values (1004, 'C++', 5000.00);
+insert into course_details values (1005, 'PHP', 5000.00);
+insert into course_details values (1006, 'Data Structure', 5000.00);
+insert into course_details values (1007, 'Java', 5000.00);
+insert into course_details values (1008, 'Python', 8000.00);
+insert into course_details values (1009, 'SQL/PLSQL/MYSQL', 5000.00);
+insert into course_details values (1010, 'Hibernate', 8000.00);
+
+
+STEP - 7 : CREATE THIRD TABLE student_course_details (RELATIONSHIP TABLE M-M)
+-------------------------------------------------------------------------------
+
+CREATE TABLE student_course_details (
+
+student_no int references student_fee_details(student_no) ON DELETE CASCADE ON UPDATE CASCADE, 
+course_code int references course_details(course_code) ON DELETE CASCADE ON UPDATE CASCADE, student_fee_type varchar(20) NOT NULL, 
+amount_in_num float NOT NULL, 
+enrollment_date date NOT NULL, 
+Payment_type varchar(20) NOT NULL
+
+                                    );
+
+insert into student_course_details values (101, 1006, 'full', 6000.00, '2024-04-28', 'upi');
+insert into student_course_details values (102, 1001, 'full', 8000.00, '2024-04-21', 'cash');
+insert into student_course_details values (103, 1009, 'installment', 7000.00, '2024-08-27', 'credit card');
+
+
+
+SELECT QUERIES OF EACH TABLE
+--------------------------------
+
+SELECT * FROM student_fee_details;
+
+SELECT * FROM course_details;
+
+SELECT * 
+FROM student_fee_details, course_details, student_course_details 
+WHERE  student_fee_details.student_no = student_course_details.student_no
+AND    course_details.course_code = student_course_details.course_code;
+
+
+
+
+----------------------------------
+SOME QUERY'S USED IN PROJECT 
+----------------------------------
+
+SELECT * 
+FROM student_fee_details, course_details, student_course_details 
+WHERE  student_fee_details.student_no = student_course_details.student_no
+AND    course_details.course_code = student_course_details.course_code;
+
+
+SELECT  course_fee, amount_in_num
+FROM course_details, student_fee_details, student_course_details
+WHERE student_fee_details.student_no = student_course_details.student_no
+AND    course_details.course_code = student_course_details.course_code;
+
+
+SELECT  sum(course_fee) AS TOTAL_AMOUNT, sum(amount_in_num) AS AMOUNT_PENDING
+FROM course_details, student_fee_details, student_course_details
+WHERE student_fee_details.student_no = student_course_details.student_no
+AND    course_details.course_code = student_course_details.course_code;
+
+SELECT *
+FROM course_details, student_fee_details, student_course_details
+WHERE student_fee_details.student_no = student_course_details.student_no
+AND    course_details.course_code = student_course_details.course_code
+AND course_details.course_code = 1008;
+
+SELECT count(*) from student_course_details WHERE course_code = 1008;
+
+SELECT sum(course_fee), sum(amount_in_num) 
+FROM course_details, student_fee_details, student_course_details 
+WHERE student_fee_details.student_no = student_course_details.student_no 
+AND course_details.course_code = student_course_details.course_code 
+AND course_details.course_code = 1010;
+
+
+SELECT course_fee, amount_in_num
+FROM course_details, student_fee_details, student_course_details 
+WHERE student_fee_details.student_no = student_course_details.student_no 
+AND course_details.course_code = student_course_details.course_code
+AND student_course_details.student_no = 114;
+
+SELECT Student_full_name, course_name, amount_in_num, course_fee
+FROM course_details, student_fee_details, student_course_details 
+WHERE student_fee_details.student_no = student_course_details.student_no 
+AND course_details.course_code = student_course_details.course_code
+AND student_course_details.student_no = 114
+AND student_course_details.course_code = 1012;
